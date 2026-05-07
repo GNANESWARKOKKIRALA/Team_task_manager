@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}{{ project.name }} - TaskManager{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('projects.list_projects') }}">Projects</a></li><li class="breadcrumb-item active">{{ project.name }}</li></ol></nav>
+        <h3 class="fw-bold mb-0">{{ project.name }}</h3>
+        <p class="text-muted">{{ project.description or 'No description provided.' }}</p>
+    </div>
+    <a href="{{ url_for('tasks.create_task', project_id=project.id) }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Task</a>
+</div>
+
+<div class="row g-4">
+    <!-- Task Columns -->
+    {% set statuses = [('Todo','secondary','📋'), ('In Progress','primary','🔄'), ('Done','success','✅')] %}
+    {% for status, color, icon in statuses %}
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h6 class="fw-bold mb-3">{{ icon }} {{ status }}
+                <span class="badge bg-{{ color }} ms-1">{{ tasks|selectattr('status','equalto',status)|list|length }}</span>
+            </h6>
+            {% for task in tasks if task.status == status %}
+            <div class="card mb-2 border-0 shadow-sm {% if task.is_overdue() %}border-start border-danger border-3{% endif %}">
+                <div class="card-body p-2">
+                    <div class="fw-semibold small">{{ task.title }}</div>
+                    {% if task.assignee %}
+                    <div class="text-muted" style="font-size:0.75rem;"><i class="bi bi-person me-1"></i>{{ task.assignee.username }}</div>
+                    {% endif %}
+                    {% if task.due_date %}
+                    <div class="{% if task.is_overdue() %}text-danger{% else %}text-muted{% endif %}" style="font-size:0.75rem;"><i class="bi bi-calendar me-1"></i>{{ task.due_date.strftime('%b %d') }}</div>
+                    {% endif %}
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="badge badge-{{ task.priority.lower() }}">{{ task.priority }}</span>
+                        <div class="d-flex gap-1">
+                            <form method="POST" action="{{ url_for('tasks.update_status', task_id=task.id) }}" class="d-inline">
+                                <select name="status" class="form-select form-select-sm" style="width:auto;font-size:0.7rem;" onchange="this.form.submit()">
+                                    <option value="Todo" {% if task.status=='Todo' %}selected{% endif %}>Todo</option>
+                                    <option value="In Progress" {% if task.status=='In Progress' %}selected{% endif %}>In Progress</option>
+                                    <option value="Done" {% if task.status=='Done' %}selected{% endif %}>Done</option>
+                                </select>
+                            </form>
+                            {% if current_user.is_admin() %}
+                            <form method="POST" action="{{ url_for('tasks.delete_task', task_id=task.id) }}" onsubmit="return confirm('Delete?')">
+                                <button class="btn btn-sm btn-outline-danger" style="padding:1px 5px;"><i class="bi bi-trash" style="font-size:0.7rem;"></i></button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-muted text-center small py-2">No tasks</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Team Members -->
+<div class="card mt-4 p-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0">👥 Team Members</h6>
+        {% if current_user.is_admin() %}
+        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#addMember">Add Member</button>
+        {% endif %}
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        {% for member in members %}
+        <span class="badge bg-light text-dark border">
+            <span class="fw-bold me-1">{{ member.username[0].upper() }}</span>{{ member.username }} ({{ member.role }})
+        </span>
+        {% endfor %}
+    </div>
+    {% if current_user.is_admin() %}
+    <div class="collapse mt-3" id="addMember">
+        <form method="POST" action="{{ url_for('projects.add_member', project_id=project.id) }}" class="d-flex gap-2">
+            <select name="user_id" class="form-select form-select-sm">
+                {% for user in all_users %}
+                <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-sm btn-primary">Add</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
