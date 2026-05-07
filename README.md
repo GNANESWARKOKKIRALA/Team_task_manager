@@ -1,6 +1,6 @@
 # 🗂️ Team Task Manager — Full-Stack Web App
 
-> A full-stack project management web application with **role-based access control (Admin/Member)**, built with **Flask + SQLAlchemy + SQLite**, deployed on **Railway**.
+> A full-stack project management web application with **role-based access control (Admin/Member)**, built with **Flask + SQLAlchemy + SQLite**, deployed on **Render**.
 
 ---
 
