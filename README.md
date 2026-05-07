@@ -359,7 +359,7 @@ SECRET_KEY=your-strong-random-secret-key-here
 B.Tech CSE | Tirumala Engineering College, 2026  
 GitHub: [github.com/GNANESWARKOKKIRALA](https://github.com/GNANESWARKOKKIRALA)  
 Portfolio: [gnaneswarkokkirala-portfolio.netlify.app](https://gnaneswarkokkirala-portfolio.netlify.app)
-
+Live : https://team-task-manager-i750.onrender.com/
 ---
 
 ## 📄 License
