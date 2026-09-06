@@ -39,11 +39,15 @@ This project was built as a **full-stack web application assignment** covering R
 | --------------------- | -------------------------------------------------------------------------------------------- |
 | ✅ Authentication     | Signup / Login / Logout with hashed passwords                                                |
 | ✅ Role-Based Access  | Admin can create projects, add members, delete tasks; Member can view and update their tasks |
-| ✅ Project Management | Create projects, view members, track task counts                                             |
-| ✅ Task Management    | Create tasks with priority (High/Medium/Low), due date, assignment                           |
-| ✅ Status Tracking    | Kanban-style board: Todo → In Progress → Done                                              |
-| ✅ Overdue Detection  | Auto-detects and highlights overdue tasks on dashboard                                       |
-| ✅ Dashboard          | Overview of all stats: total tasks, completed, in-progress, overdue                          |
+| ✅ Project Management | Create projects, view members, archive projects, progress bars                               |
+| ✅ Task Management    | Create, assign, comment, label, status tracking                                              |
+| ✅ Kanban Board       | Drag-and-drop tasks across Todo, In Progress, Review, Done                                   |
+| ✅ Dashboard Analytics| Real-time charts for status and priority distributions (Chart.js)                            |
+| ✅ My Tasks & Filters | Dedicated page to filter, sort, and search tasks                                             |
+| ✅ Team Directory     | View team stats, admins can manage roles                                                     |
+| ✅ Notifications      | Real-time assignment and comment notifications                                               |
+| ✅ Activity History   | Track all major actions across projects and tasks                                            |
+| ✅ Dark Mode          | Seamless light/dark theme toggling via localStorage                                          |
 | ✅ Deployment         | Live on Render via Gunicorn                                                                  |
 
 ---
@@ -52,10 +56,11 @@ This project was built as a **full-stack web application assignment** covering R
 
 | Layer                | Technology                              |
 | -------------------- | --------------------------------------- |
-| **Frontend**   | Flask Jinja2 Templates + Bootstrap 5    |
-| **Backend**    | Flask (Python) — REST-style routes     |
+| **Frontend**   | HTML5, CSS3, Vanilla JS, Jinja2, Bootstrap 5, Chart.js |
+| **Backend**    | Flask (Python) — REST-style APIs + SSR     |
 | **Database**   | SQLite (via SQLAlchemy ORM)             |
 | **Auth**       | Flask-Login + Werkzeug password hashing |
+| **Testing**    | Pytest                                  |
 | **Deployment** | Render + Gunicorn                       |
 
 ---

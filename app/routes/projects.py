@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
-from app.models import Project, ProjectMember, User, Task
+from app.models import Project, ProjectMember, User, Task, ActivityLog
+from app.utils import log_activity, create_notification
 from app import db
 
 projects_bp = Blueprint('projects', __name__)
@@ -33,6 +34,8 @@ def create_project():
         pm = ProjectMember(project_id=project.id, user_id=current_user.id)
         db.session.add(pm)
         db.session.commit()
+        
+        log_activity('Created Project', 'Project', project.id, f'Created project: {name}')
         flash('Project created!', 'success')
         return redirect(url_for('projects.view_project', project_id=project.id))
     return render_template('projects/create.html')
@@ -46,7 +49,11 @@ def view_project(project_id):
     members = project.get_members()
     tasks = Task.query.filter_by(project_id=project_id).all()
     all_users = User.query.all() if current_user.is_admin() else []
-    return render_template('projects/view.html', project=project, members=members, tasks=tasks, all_users=all_users)
+    
+    # recent activity for this project
+    activities = ActivityLog.query.filter_by(entity_type='Project', entity_id=project.id).order_by(ActivityLog.created_at.desc()).limit(10).all()
+    
+    return render_template('projects/view.html', project=project, members=members, tasks=tasks, all_users=all_users, activities=activities)
 
 @projects_bp.route('/<int:project_id>/add_member', methods=['POST'])
 @login_required
@@ -65,8 +72,23 @@ def add_member(project_id):
         pm = ProjectMember(project_id=project_id, user_id=user_id)
         db.session.add(pm)
         db.session.commit()
+        
+        log_activity('Added Member', 'Project', project.id, f'Added {user.username} to project')
+        create_notification(user.id, f"You were added to project: {project.name}", url_for('projects.view_project', project_id=project.id))
         flash(f'{user.username} added to project.', 'success')
     return redirect(url_for('projects.view_project', project_id=project_id))
+
+@projects_bp.route('/<int:project_id>/archive', methods=['POST'])
+@login_required
+def archive_project(project_id):
+    if not current_user.is_admin():
+        abort(403)
+    project = Project.query.get_or_404(project_id)
+    project.status = 'Archived' if project.status != 'Archived' else 'Active'
+    db.session.commit()
+    log_activity('Archived Project' if project.status == 'Archived' else 'Unarchived Project', 'Project', project.id)
+    flash(f'Project {project.status.lower()}.', 'success')
+    return redirect(url_for('projects.list_projects'))
 
 @projects_bp.route('/<int:project_id>/delete', methods=['POST'])
 @login_required

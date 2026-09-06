@@ -1,0 +1,126 @@
+:root {
+  --bg-color: #f8f9fa;
+  --text-color: #212529;
+  --card-bg: #ffffff;
+  --sidebar-bg: linear-gradient(180deg, #1e3a5f 0%, #2d5a8e 100%);
+  --sidebar-text: #ffffff;
+  --border-color: rgba(0,0,0,0.1);
+  --input-bg: #ffffff;
+  --input-text: #212529;
+}
+
+[data-theme="dark"] {
+  --bg-color: #121212;
+  --text-color: #e0e0e0;
+  --card-bg: #1e1e1e;
+  --sidebar-bg: #1f1f1f;
+  --sidebar-text: #e0e0e0;
+  --border-color: rgba(255,255,255,0.1);
+  --input-bg: #2d2d2d;
+  --input-text: #e0e0e0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  border-radius: 12px;
+  color: var(--text-color);
+}
+
+.sidebar {
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  min-height: 100vh;
+  width: 260px;
+  min-width: 260px;
+  transition: margin-left 0.3s;
+}
+
+.sidebar.collapsed {
+  margin-left: -260px;
+}
+
+.sidebar .nav-link {
+  color: rgba(255,255,255,0.75);
+  border-radius: 8px;
+  margin: 4px 12px;
+  padding: 10px 16px;
+  transition: all 0.2s;
+}
+
+.sidebar .nav-link:hover, .sidebar .nav-link.active {
+  color: #fff;
+  background: rgba(255,255,255,0.15);
+}
+
+/* Kanban Board */
+.kanban-board {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.kanban-column {
+  min-width: 300px;
+  background-color: rgba(0,0,0,0.02);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px dashed var(--border-color);
+}
+
+[data-theme="dark"] .kanban-column {
+  background-color: rgba(255,255,255,0.02);
+}
+
+.kanban-card {
+  cursor: grab;
+  margin-bottom: 1rem;
+}
+.kanban-card:active {
+  cursor: grabbing;
+}
+.kanban-card.dragging {
+  opacity: 0.5;
+}
+
+/* Utilities */
+.stat-card {
+  border-radius: 16px;
+  color: white;
+  transition: transform 0.2s;
+}
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Form inputs for dark mode */
+.form-control, .form-select {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border-color: var(--border-color);
+}
+.form-control:focus, .form-select:focus {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+[data-theme="dark"] .text-muted {
+  color: #a0a0a0 !important;
+}
+
+/* Overdue Badge Pulse */
+.overdue-badge {
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }

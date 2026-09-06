@@ -20,11 +20,19 @@ def create_app():
     from app.routes.dashboard import dashboard_bp
     from app.routes.projects import projects_bp
     from app.routes.tasks import tasks_bp
+    from app.routes.api import api_bp
+    from app.routes.team import team_bp
+    from app.routes.profile import profile_bp
+    from app.routes.my_tasks import my_tasks_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(projects_bp, url_prefix='/projects')
     app.register_blueprint(tasks_bp, url_prefix='/tasks')
+    app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(team_bp, url_prefix='/team')
+    app.register_blueprint(profile_bp, url_prefix='/profile')
+    app.register_blueprint(my_tasks_bp, url_prefix='/my-tasks')
 
     with app.app_context():
         db.create_all()

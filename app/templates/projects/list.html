@@ -2,41 +2,137 @@
 {% block title %}Projects - TaskManager{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="fw-bold">📁 All Projects</h3>
+    <h3 class="fw-bold mb-0">📁 Projects</h3>
     {% if current_user.is_admin() %}
     <a href="{{ url_for('projects.create_project') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New Project</a>
     {% endif %}
 </div>
-{% if projects %}
-<div class="row g-3">
-    {% for project in projects %}
-    <div class="col-md-4">
-        <div class="card p-3 h-100">
-            <div class="d-flex justify-content-between mb-2">
-                <span class="badge {% if project.status == 'Active' %}bg-success{% else %}bg-secondary{% endif %}">{{ project.status }}</span>
-                {% if current_user.is_admin() %}
-                <form method="POST" action="{{ url_for('projects.delete_project', project_id=project.id) }}" onsubmit="return confirm('Delete this project?')">
-                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                </form>
-                {% endif %}
+
+<!-- Tabs for Active / Archived -->
+<ul class="nav nav-tabs mb-4" id="projectTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active-projects" type="button" role="tab">Active</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="archived-tab" data-bs-toggle="tab" data-bs-target="#archived-projects" type="button" role="tab">Archived</button>
+    </li>
+</ul>
+
+<div class="tab-content" id="projectTabsContent">
+    <!-- Active Projects -->
+    <div class="tab-pane fade show active" id="active-projects" role="tabpanel">
+        {% set active_projects = projects|selectattr("status", "equalto", "Active")|list %}
+        {% if active_projects %}
+        <div class="row g-4">
+            {% for project in active_projects %}
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 project-card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-bold mb-0 text-truncate" title="{{ project.name }}">{{ project.name }}</h5>
+                            
+                            {% if current_user.is_admin() %}
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    <li>
+                                        <form method="POST" action="{{ url_for('projects.archive_project', project_id=project.id) }}">
+                                            <button class="dropdown-item"><i class="bi bi-archive me-2"></i>Archive</button>
+                                        </form>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('projects.delete_project', project_id=project.id) }}" onsubmit="return confirm('Delete this project forever?')">
+                                            <button class="dropdown-item text-danger"><i class="bi bi-trash me-2"></i>Delete</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <p class="text-muted small mb-3 flex-grow-1">{{ project.description or 'No description.'|truncate(100) }}</p>
+                        
+                        <!-- Progress -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="fw-semibold">Progress</span>
+                                <span class="text-muted">{{ project.progress }}%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ project.progress }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                            <div class="d-flex align-items-center text-muted small">
+                                <i class="bi bi-people me-1"></i> {{ project.members|length }}
+                                <i class="bi bi-list-task ms-3 me-1"></i> {{ project.tasks|length }}
+                            </div>
+                            <a href="{{ url_for('projects.view_project', project_id=project.id) }}" class="btn btn-sm btn-outline-primary">Open</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <h5 class="fw-bold">{{ project.name }}</h5>
-            <p class="text-muted small">{{ project.description or 'No description.' }}</p>
-            <div class="d-flex justify-content-between align-items-center mt-auto">
-                <small class="text-muted"><i class="bi bi-people me-1"></i>{{ project.members|length }} members</small>
-                <a href="{{ url_for('projects.view_project', project_id=project.id) }}" class="btn btn-sm btn-outline-primary">Open →</a>
-            </div>
+            {% endfor %}
         </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="fs-1 text-muted mb-3"><i class="bi bi-folder-x"></i></div>
+            <h5 class="text-muted">No active projects found</h5>
+        </div>
+        {% endif %}
     </div>
-    {% endfor %}
+    
+    <!-- Archived Projects -->
+    <div class="tab-pane fade" id="archived-projects" role="tabpanel">
+        {% set archived_projects = projects|selectattr("status", "equalto", "Archived")|list %}
+        {% if archived_projects %}
+        <div class="row g-4">
+            {% for project in archived_projects %}
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 project-card bg-light opacity-75">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-bold mb-0 text-muted">{{ project.name }}</h5>
+                            {% if current_user.is_admin() %}
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    <li>
+                                        <form method="POST" action="{{ url_for('projects.archive_project', project_id=project.id) }}">
+                                            <button class="dropdown-item"><i class="bi bi-arrow-counterclockwise me-2"></i>Unarchive</button>
+                                        </form>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('projects.delete_project', project_id=project.id) }}" onsubmit="return confirm('Delete this project forever?')">
+                                            <button class="dropdown-item text-danger"><i class="bi bi-trash me-2"></i>Delete</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <p class="text-muted small mb-3 flex-grow-1">{{ project.description or 'No description.' }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                            <span class="badge bg-secondary">Archived</span>
+                            <a href="{{ url_for('projects.view_project', project_id=project.id) }}" class="btn btn-sm btn-outline-secondary">View</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <h5 class="text-muted">No archived projects</h5>
+        </div>
+        {% endif %}
+    </div>
 </div>
-{% else %}
-<div class="text-center py-5">
-    <div class="fs-1">📂</div>
-    <h5 class="text-muted">No projects found</h5>
-    {% if current_user.is_admin() %}
-    <a href="{{ url_for('projects.create_project') }}" class="btn btn-primary mt-2">Create First Project</a>
-    {% endif %}
-</div>
-{% endif %}
 {% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Team - TaskManager{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0"><i class="bi bi-people me-2"></i>Team Directory</h3>
+</div>
+
+<div class="row g-4">
+    {% for user in users %}
+    <div class="col-md-4 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm text-center">
+            <div class="card-body d-flex flex-column align-items-center">
+                <!-- Avatar -->
+                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold mb-3 shadow-sm" 
+                     style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, {% if user.is_admin() %}#f7971e, #ffd200{% else %}#11998e, #38ef7d{% endif %});">
+                    {{ user.username[0].upper() }}
+                </div>
+                
+                <h5 class="fw-bold mb-1">{{ user.username }}</h5>
+                <div class="mb-3">
+                    <span class="badge bg-{{ 'primary' if user.is_admin() else 'secondary' }}">{{ user.role }}</span>
+                </div>
+                
+                <!-- Stats -->
+                <div class="w-100 mt-auto">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Tasks Completed</span>
+                        <span>{{ user.completed_tasks }} / {{ user.total_tasks }}</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ user.completion_rate }}%"></div>
+                    </div>
+                    
+                    {% if current_user.is_admin() and current_user.id != user.id %}
+                    <form method="POST" action="{{ url_for('team.change_role', user_id=user.id) }}" class="mt-3 border-top pt-3">
+                        <div class="input-group input-group-sm">
+                            <select name="role" class="form-select">
+                                <option value="Member" {% if user.role == 'Member' %}selected{% endif %}>Member</option>
+                                <option value="Admin" {% if user.role == 'Admin' %}selected{% endif %}>Admin</option>
+                            </select>
+                            <button type="submit" class="btn btn-outline-primary">Update</button>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
