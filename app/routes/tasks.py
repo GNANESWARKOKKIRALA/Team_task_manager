@@ -13,7 +13,10 @@ def create_task(project_id):
     project = Project.query.get_or_404(project_id)
     if not current_user.is_admin() and not project.is_member(current_user):
         abort(403)
-    members = project.get_members()
+    if current_user.is_admin():
+        members = User.query.all()
+    else:
+        members = project.get_members()
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
         description = request.form.get('description', '').strip()
